@@ -1,0 +1,102 @@
+# PIPELINE DEFINITION
+# Name: preprocess-data
+# Description: Load CSV, scale features, split into train/test, and save.
+# Inputs:
+#    X_test_csv: str
+#    X_train_csv: str
+#    input_csv: str
+#    y_test_csv: str
+#    y_train_csv: str
+components:
+  comp-preprocess-data:
+    executorLabel: exec-preprocess-data
+    inputDefinitions:
+      parameters:
+        X_test_csv:
+          parameterType: STRING
+        X_train_csv:
+          parameterType: STRING
+        input_csv:
+          parameterType: STRING
+        y_test_csv:
+          parameterType: STRING
+        y_train_csv:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-preprocess-data:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - preprocess_data
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.15.1'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef preprocess_data(input_csv: str, X_train_csv: str, X_test_csv:\
+          \ str, y_train_csv: str, y_test_csv: str):\n    \"\"\"\n    Load CSV, scale\
+          \ features, split into train/test, and save.\n    \"\"\"\n    df = pd.read_csv(input_csv)\n\
+          \    X = df.drop(columns=['PRICE'])\n    y = df['PRICE']\n\n    scaler =\
+          \ StandardScaler()\n    X_scaled = scaler.fit_transform(X)\n\n    X_train,\
+          \ X_test, y_train, y_test = train_test_split(\n        X_scaled, y, test_size=0.2,\
+          \ random_state=42\n    )\n\n    pd.DataFrame(X_train, columns=X.columns).to_csv(X_train_csv,\
+          \ index=False)\n    pd.DataFrame(X_test, columns=X.columns).to_csv(X_test_csv,\
+          \ index=False)\n    pd.DataFrame(y_train, columns=['PRICE']).to_csv(y_train_csv,\
+          \ index=False)\n    pd.DataFrame(y_test, columns=['PRICE']).to_csv(y_test_csv,\
+          \ index=False)\n\n"
+        image: python:3.11
+pipelineInfo:
+  name: preprocess-data
+root:
+  dag:
+    tasks:
+      preprocess-data:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-preprocess-data
+        inputs:
+          parameters:
+            X_test_csv:
+              componentInputParameter: X_test_csv
+            X_train_csv:
+              componentInputParameter: X_train_csv
+            input_csv:
+              componentInputParameter: input_csv
+            y_test_csv:
+              componentInputParameter: y_test_csv
+            y_train_csv:
+              componentInputParameter: y_train_csv
+        taskInfo:
+          name: preprocess-data
+  inputDefinitions:
+    parameters:
+      X_test_csv:
+        parameterType: STRING
+      X_train_csv:
+        parameterType: STRING
+      input_csv:
+        parameterType: STRING
+      y_test_csv:
+        parameterType: STRING
+      y_train_csv:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.15.1
