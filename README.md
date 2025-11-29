@@ -22,13 +22,20 @@ sudo apt update
 sudo apt install -y curl conntrack
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
-Start Minikube:
+```
+2. Start Minikube:
 
+``` bash
 minikube start --driver=docker --cpus=4 --memory=8192
-Verify Minikube is running:
+```
+3.Verify Minikube is running:
 
+```bash
 minikube status
+```
+
 2. Kubeflow Pipelines (Standalone)
+``` bash
 Deploy KFP:
 
 
