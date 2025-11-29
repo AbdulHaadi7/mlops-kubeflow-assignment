@@ -34,7 +34,7 @@ minikube start --driver=docker --cpus=4 --memory=8192
 minikube status
 ```
 
-2. Kubeflow Pipelines (Standalone)
+### 2. Kubeflow Pipelines (Standalone)
 
 1. Deploy KFP:
 
@@ -56,7 +56,7 @@ kubectl get pods -n kubeflow
 ``` bash
 minikube service ml-pipeline-ui -n kubeflow
 ```
-3. DVC Remote Storage
+### 3. DVC Remote Storage
 Initialize DVC in your project:
 
 ``` bash
@@ -65,7 +65,7 @@ dvc remote add -d myremote s3://mybucket/path
 dvc push
 ```
 
-Pipeline Walkthrough
+## Pipeline Walkthrough
 1. Define Pipeline
 
 All pipeline components are defined in pipeline.py using kfp.dsl.pipeline.
