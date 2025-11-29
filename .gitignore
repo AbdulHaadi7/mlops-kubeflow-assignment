@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+env/
+venv/
+
+# DVC
+.dvc/
+.dvcignore
+/.dvc/cache/
+
+# OS
+.DS_Store
