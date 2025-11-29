@@ -35,28 +35,35 @@ minikube status
 ```
 
 2. Kubeflow Pipelines (Standalone)
+
+1. Deploy KFP:
+
 ``` bash
-Deploy KFP:
-
-
 export PIPELINE_VERSION=2.14.4
 kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
 kubectl wait --for condition=established --timeout=120s crd/applications.app.k8s.io
 kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic?ref=$PIPELINE_VERSION"
-Check all pods are running:
+```
 
+2. Check all pods are running:
 
+``` bash
 kubectl get pods -n kubeflow
-Access the Kubeflow Pipelines UI:
+```
 
+3. Access the Kubeflow Pipelines UI:
 
+``` bash
 minikube service ml-pipeline-ui -n kubeflow
+```
 3. DVC Remote Storage
 Initialize DVC in your project:
 
+``` bash
 dvc init
 dvc remote add -d myremote s3://mybucket/path
 dvc push
+```
 
 Pipeline Walkthrough
 1. Define Pipeline
@@ -67,6 +74,7 @@ Components can be linked using outputs from one step as inputs to the next.
 
 Example:
 
+``` bash
 @dsl.pipeline(
     name='ML Pipeline',
     description='An end-to-end ML pipeline.'
@@ -75,10 +83,13 @@ def my_pipeline():
     preprocess = preprocess_op()
     train = train_op(preprocess.output)
     evaluate = evaluate_op(train.output)
+```
 
 2. Compile Pipeline
-python pipeline.py --compile
 
+``` bash
+python pipeline.py --compile
+```
 
 This generates pipeline.yaml.
 
